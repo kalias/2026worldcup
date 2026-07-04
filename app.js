@@ -90,9 +90,7 @@
 
   /* ---------- build a round column ---------- */
   function buildRound(round, extraClass) {
-    round.matches.forEach((m, mIdx) => {
-      m._key = `${round.key}:${mIdx}`;
-    });
+    // _key is pre-assigned globally; do NOT reassign with local slice index.
     const roundEl = document.createElement("div");
     roundEl.className = "round " + (extraClass || "");
     roundEl.innerHTML = `
@@ -127,6 +125,16 @@
   const qf = ROUNDS.find((r) => r.key === "qf");
   const sf = ROUNDS.find((r) => r.key === "sf");
   const finalRound = ROUNDS.find((r) => r.key === "final");
+
+  // Assign GLOBALLY-unique keys based on each match's index in the original
+  // ROUNDS array. Slicing into halves resets local indices, which previously
+  // caused both halves to produce identical keys (e.g. right-half Portugal got
+  // "r32:3" colliding with left-half Morocco) — leading to tooltips showing
+  // the wrong match. Assigning once here, before any slicing, prevents that.
+  [r32, r16, qf, sf].forEach((round) => {
+    round.matches.forEach((m, i) => (m._key = `${round.key}:${i}`));
+  });
+  finalRound.matches.forEach((m, i) => (m._key = `final:${i}`));
 
   // Left half = first 8 R32, first 4 R16, first 2 QF, first 1 SF
   const leftR32 = { key: "r32", title: "32强 · Round of 32", matches: r32.matches.slice(0, 8) };
@@ -179,8 +187,7 @@
   bracketEl.appendChild(center);
   bracketEl.appendChild(rightHalf);
 
-  // Place final match into center slot
-  finalRound.matches.forEach((m, i) => (m._key = `final:${i}`));
+  // Place final match into center slot (key already assigned globally)
   const finalSlot = center.querySelector("#finalSlot");
   const finalWrap = document.createElement("div");
   finalWrap.className = "match-slot";
