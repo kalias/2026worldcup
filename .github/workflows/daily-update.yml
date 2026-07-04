@@ -1,0 +1,50 @@
+name: 每日赛果更新
+
+# 每天 UTC 04:00（北京时间 12:00）自动抓取最新赛果并更新 data.js
+# 也可在 Actions 页面手动触发
+on:
+  schedule:
+    - cron: '0 4 * * *'    # UTC 04:00 = 北京时间 12:00
+  workflow_dispatch:        # 手动触发
+
+permissions:
+  contents: write           # 允许推送提交
+
+concurrency:
+  group: daily-update
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 配置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 抓取赛果并更新 data.js
+        run: node scripts/fetch-results.js
+
+      - name: 检查是否有变更
+        id: diff
+        run: |
+          if git diff --quiet data.js; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "无变更"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "data.js 有变更"
+          fi
+
+      - name: 提交并推送
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.js
+          git commit -m "🤖 自动更新赛果 $(date -u +%Y-%m-%d)"
+          git push
