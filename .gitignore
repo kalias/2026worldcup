@@ -1,0 +1,10 @@
+# 测试用的本地依赖（jsdom 等），不提交
+node_modules/
+package.json
+package-lock.json
+
+# 系统/编辑器
+.DS_Store
+*.log
+.vscode/
+.idea/

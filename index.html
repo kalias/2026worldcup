@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2026 世界杯晋级图 · AI 预测</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <h1>2026 FIFA 世界杯 <span class="accent">晋级预测图</span></h1>
+      <p class="subtitle">基于球队实力、球员状态与已完赛表现，对剩余淘汰赛进行预测。将鼠标悬停在 <strong>预测节点</strong> 上查看预测依据。</p>
+      <div class="legend">
+        <span class="legend-item"><span class="dot done"></span>已完赛</span>
+        <span class="legend-item"><span class="dot pred"></span>预测结果</span>
+        <span class="legend-item"><span class="dot upcoming"></span>待预测</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="bracket-scroll" id="bracketScroll">
+    <div class="scroll-hint" aria-hidden="true">← 滑动查看完整对阵 →</div>
+    <div id="bracket" class="bracket"></div>
+  </main>
+
+  <footer class="app-footer">
+    <p>数据截至 2026-07-04（16强开赛日）。预测仅为基于公开信息的分析推演，不代表真实赛果。</p>
+    <p class="sources">数据来源：FIFA / Wikipedia / CBS Sports / ESPN</p>
+  </footer>
+
+  <div id="tooltip" class="tooltip" role="tooltip" aria-hidden="true"></div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
