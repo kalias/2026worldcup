@@ -313,7 +313,15 @@
   if (scrollEl) {
     scrollEl.addEventListener("scroll", updateScrollEdges, { passive: true });
     window.addEventListener("resize", updateScrollEdges);
-    requestAnimationFrame(updateScrollEdges);
+    // On first load, centre the bracket so the Final/Champion sits in the
+    // middle of the viewport (the tree is wider than any screen, so we start
+    // at the middle rather than the left edge). Only do this once — don't
+    // fight the user's manual scrolling afterwards.
+    requestAnimationFrame(() => {
+      const max = scrollEl.scrollWidth - scrollEl.clientWidth;
+      scrollEl.scrollLeft = Math.max(0, max / 2);
+      updateScrollEdges();
+    });
   }
 
   /* ---------- tooltip wiring ---------- */
