@@ -373,7 +373,7 @@
       </div>
       <div class="tt-section">
         <div class="tt-section-title">赛果（已完赛）</div>
-        <div><strong>${m.winner}</strong> 晋级</div>
+        <div><strong>${cn(m.winner)}</strong> 晋级</div>
       </div>
       ${m.note ? `<div class="tt-rationale">${m.note}</div>` : ""}`;
   }

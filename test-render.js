@@ -110,5 +110,14 @@ assert(rationalesOk, "all predicted matches have full rationale");
 // 10. tooltip element exists
 assert(!!doc.getElementById("tooltip"), "tooltip element present");
 
+// 11. done-match tooltip shows winner in Chinese (not English)
+{
+  const doneMatch = doc.querySelector('.match.is-done[data-key="r32:0"]'); // Brazil vs Japan
+  doneMatch.dispatchEvent(new window.MouseEvent("click", { bubbles: true, clientX: 10, clientY: 10 }));
+  const tt = doc.getElementById("tooltip");
+  const winnerLine = tt.querySelector(".tt-section div strong");
+  assert(winnerLine && winnerLine.textContent === "巴西", `done-tooltip winner 中文 = ${winnerLine && winnerLine.textContent}`);
+}
+
 console.log(failures === 0 ? "\n🎉 ALL CHECKS PASSED" : `\n💥 ${failures} FAILURES`);
 process.exit(failures === 0 ? 0 : 1);
