@@ -366,14 +366,19 @@
   }
 
   function doneNoteHTML(m) {
+    // structural score line: regular score, optionally (pen) shootout
+    const isPenShootout = m.pens && m.sa === m.sb;
+    const scoreLine = isPenShootout
+      ? `${cn(m.a)} ${m.sa}-${m.sb}（点球 ${m.pens}）${cn(m.b)}`
+      : `${cn(m.a)} ${m.sa}-${m.sb}${m.aet ? "（加时）" : ""} ${cn(m.b)}`;
     return `
       <div class="tt-header">
         <span class="tt-flag">${flag(m.winner)}</span>
-        <span>${cn(m.a)} ${m.sa}-${m.sb} ${cn(m.b)}</span>
+        <span>${scoreLine}</span>
       </div>
       <div class="tt-section">
         <div class="tt-section-title">赛果（已完赛）</div>
-        <div><strong>${cn(m.winner)}</strong> 晋级</div>
+        <div><strong>${cn(m.winner)}</strong> 晋级${isPenShootout ? "（点球大战）" : ""}</div>
       </div>
       ${m.note ? `<div class="tt-rationale">${m.note}</div>` : ""}`;
   }
