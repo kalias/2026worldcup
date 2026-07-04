@@ -312,12 +312,14 @@
   /* ---------- tooltip wiring ---------- */
   let currentTarget = null;
 
-  function showTooltip(html, x, y) {
+  // Position tooltip anchored to the triggering card, not the cursor —
+  // prevents the panel from drifting onto a neighbouring match card.
+  function showTooltip(html, anchorEl, clientX, clientY) {
     tooltipEl.innerHTML = html;
     tooltipEl.classList.add("show");
     tooltipEl.setAttribute("aria-hidden", "false");
 
-    // Touch devices: bottom-fixed sheet, no cursor-follow positioning
+    // Touch devices: bottom-fixed sheet, no anchoring
     if (isTouch) {
       tooltipEl.classList.add("is-mobile");
       tooltipEl.style.left = "";
@@ -326,14 +328,25 @@
     }
     tooltipEl.classList.remove("is-mobile");
 
+    const aRect = anchorEl.getBoundingClientRect();
     const ttRect = tooltipEl.getBoundingClientRect();
-    let left = x + 16;
-    let top = y + 16;
-    if (left + ttRect.width > window.innerWidth - 12)
-      left = x - ttRect.width - 16;
-    if (top + ttRect.height > window.innerHeight - 12)
-      top = window.innerHeight - ttRect.height - 12;
-    if (top < 12) top = 12;
+    const gap = 12;
+
+    // prefer placing tooltip to the right of the card; else left; else below
+    let left = aRect.right + gap;
+    let top = aRect.top + aRect.height / 2 - ttRect.height / 2;
+    if (left + ttRect.width > window.innerWidth - 8) {
+      left = aRect.left - ttRect.width - gap;
+    }
+    if (left < 8) {
+      // not enough horizontal room — place below, centered on card
+      left = aRect.left + aRect.width / 2 - ttRect.width / 2;
+      top = aRect.bottom + gap;
+    }
+    // clamp into viewport
+    left = Math.max(8, Math.min(left, window.innerWidth - ttRect.width - 8));
+    top = Math.max(8, Math.min(top, window.innerHeight - ttRect.height - 8));
+
     tooltipEl.style.left = left + "px";
     tooltipEl.style.top = top + "px";
   }
@@ -389,44 +402,40 @@
     return round ? round.matches[parseInt(idx, 10)] : null;
   }
 
-  bracketEl.addEventListener("mouseover", (e) => {
-    if (isTouch) return; // touch uses click handler
-    const matchNode = e.target.closest(".match");
+  // helper: show tooltip for a match or champion node (desktop hover)
+  function showForNode(node, e) {
+    const matchNode = node.closest ? node.closest(".match") : null;
     if (matchNode) {
       const key = matchNode.getAttribute("data-key");
       const status = matchNode.getAttribute("data-status");
       const m = findMatch(key);
       if (!m) return;
       if (status === "done") {
-        showTooltip(doneNoteHTML(m), e.clientX, e.clientY);
+        showTooltip(doneNoteHTML(m), matchNode, e.clientX, e.clientY);
         currentTarget = matchNode;
       } else if (status === "pred" && m.rationale) {
-        showTooltip(rationaleHTML(m.rationale), e.clientX, e.clientY);
+        showTooltip(rationaleHTML(m.rationale), matchNode, e.clientX, e.clientY);
         currentTarget = matchNode;
       }
       return;
     }
-    const champNode = e.target.closest(".champion");
+    const champNode = node.closest ? node.closest(".champion") : null;
     if (champNode) {
       const fm = ROUNDS[ROUNDS.length - 1].matches[0];
       if (fm && fm.rationale) {
-        showTooltip(rationaleHTML(fm.rationale), e.clientX, e.clientY);
+        showTooltip(rationaleHTML(fm.rationale), champNode, e.clientX, e.clientY);
         currentTarget = champNode;
       }
     }
+  }
+
+  bracketEl.addEventListener("mouseover", (e) => {
+    if (isTouch) return; // touch uses click handler
+    showForNode(e.target, e);
   });
 
-  bracketEl.addEventListener("mousemove", (e) => {
-    if (isTouch || !currentTarget) return;
-    const ttRect = tooltipEl.getBoundingClientRect();
-    let left = e.clientX + 16;
-    let top = e.clientY + 16;
-    if (left + ttRect.width > window.innerWidth - 12) left = e.clientX - ttRect.width - 16;
-    if (top + ttRect.height > window.innerHeight - 12) top = window.innerHeight - ttRect.height - 12;
-    if (top < 12) top = 12;
-    tooltipEl.style.left = left + "px";
-    tooltipEl.style.top = top + "px";
-  });
+  // no cursor-follow on mousemove: tooltip stays anchored to the card
+  bracketEl.addEventListener("mousemove", () => {});
 
   bracketEl.addEventListener("mouseout", (e) => {
     if (isTouch) return; // touch closes via click-away
@@ -448,8 +457,8 @@
       const status = matchNode.getAttribute("data-status");
       const m = findMatch(key);
       if (!m) return;
-      if (status === "done") showTooltip(doneNoteHTML(m), e.clientX, e.clientY);
-      else if (status === "pred" && m.rationale) showTooltip(rationaleHTML(m.rationale), e.clientX, e.clientY);
+      if (status === "done") showTooltip(doneNoteHTML(m), matchNode, e.clientX, e.clientY);
+      else if (status === "pred" && m.rationale) showTooltip(rationaleHTML(m.rationale), matchNode, e.clientX, e.clientY);
       currentTarget = matchNode;
     } else if (champNode) {
       if (isTouch && currentTarget === champNode) {
@@ -457,7 +466,7 @@
         return;
       }
       const fm = ROUNDS[ROUNDS.length - 1].matches[0];
-      if (fm && fm.rationale) showTooltip(rationaleHTML(fm.rationale), e.clientX, e.clientY);
+      if (fm && fm.rationale) showTooltip(rationaleHTML(fm.rationale), champNode, e.clientX, e.clientY);
       currentTarget = champNode;
     } else {
       hideTooltip();
