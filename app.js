@@ -15,6 +15,7 @@
 
   /* ---------- helpers ---------- */
   const flag = (name) => (typeof FLAGS !== "undefined" && FLAGS[name]) || "🏳️";
+  const cn = (name) => (typeof NAMES_CN !== "undefined" && NAMES_CN[name]) || name;
 
   function teamRow(t, score, opts) {
     const cls = ["team"];
@@ -27,7 +28,7 @@
     return `
       <div class="${cls.join(" ")}">
         <span class="flag">${flag(t)}</span>
-        <span class="name">${t}</span>
+        <span class="name">${cn(t)}</span>
         ${scoreText}
       </div>`;
   }
@@ -160,7 +161,7 @@
       <div class="trophy">🏆</div>
       <div class="label">PREDICTED CHAMPION</div>
       <div class="flag">${flag(CHAMPION)}</div>
-      <div class="name">${CHAMPION}</div>
+      <div class="name">${cn(CHAMPION)}</div>
       <div class="pred-hint">悬停查看夺冠依据</div>
     </div>`;
 
@@ -347,10 +348,9 @@
   function rationaleHTML(r) {
     if (!r) return "";
     const points = (r.points || []).map((p) => `<li>${p}</li>`).join("");
-    const homeFlag = flag((r.title.split("🆚")[0] || "").trim());
     return `
       <div class="tt-header">
-        <span class="tt-flag">${homeFlag}</span>
+        <span class="tt-flag">⚽</span>
         <span>${r.title}</span>
       </div>
       <div class="tt-section">
@@ -369,7 +369,7 @@
     return `
       <div class="tt-header">
         <span class="tt-flag">${flag(m.winner)}</span>
-        <span>${m.a} ${m.sa}-${m.sb} ${m.b}</span>
+        <span>${cn(m.a)} ${m.sa}-${m.sb} ${cn(m.b)}</span>
       </div>
       <div class="tt-section">
         <div class="tt-section-title">赛果（已完赛）</div>

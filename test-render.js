@@ -52,6 +52,10 @@ assert(!!doc.querySelector(".scroll-hint"), "scroll-hint element in DOM (hidden 
 const rounds = doc.querySelectorAll(".bracket .round");
 assert(rounds.length === 8, `8 round columns (got ${rounds.length})`);
 
+// team names rendered in Chinese
+const firstTeamName = doc.querySelector(".match .team .name");
+assert(firstTeamName && firstTeamName.textContent === "巴西", `first team name in 中文 = ${firstTeamName && firstTeamName.textContent}`);
+
 // 2. matches count
 const matches = doc.querySelectorAll(".match");
 assert(matches.length === 16 + 8 + 4 + 2 + 1, `${matches.length} matches (32+16+8+4+1)`);
@@ -62,7 +66,7 @@ assert(predMatches.length === 15, `${predMatches.length} predicted matches`);
 
 // 4. champion rendered with Argentina
 const champ = doc.querySelector(".champion .name");
-assert(champ && champ.textContent === "Argentina", `Champion = ${champ && champ.textContent}`);
+assert(champ && champ.textContent === "阿根廷", `Champion (中文) = ${champ && champ.textContent}`);
 
 // 5. done matches count (16 r32)
 const done = doc.querySelectorAll(".match.is-done");

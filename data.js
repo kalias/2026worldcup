@@ -19,7 +19,19 @@ const FLAGS = {
   "Cape Verde": "🇨🇻", Ghana: "🇬🇭", "South Africa": "🇿🇦", "Ivory Coast": "🇨🇮",
 };
 
+const NAMES_CN = {
+  Brazil: "巴西", Norway: "挪威", Canada: "加拿大", Morocco: "摩洛哥",
+  Paraguay: "巴拉圭", France: "法国", Mexico: "墨西哥", England: "英格兰",
+  Belgium: "比利时", "USA": "美国", Spain: "西班牙", Portugal: "葡萄牙",
+  Switzerland: "瑞士", Egypt: "埃及", Argentina: "阿根廷", Colombia: "哥伦比亚",
+  Germany: "德国", Japan: "日本", Netherlands: "荷兰", Sweden: "瑞典",
+  Ecuador: "厄瓜多尔", "DR Congo": "刚果(金)", Senegal: "塞内加尔", Bosnia: "波黑",
+  Austria: "奥地利", Croatia: "克罗地亚", Algeria: "阿尔及利亚", Australia: "澳大利亚",
+  "Cape Verde": "佛得角", Ghana: "加纳", "South Africa": "南非", "Ivory Coast": "科特迪瓦",
+};
+
 const flag = (name) => FLAGS[name] || "🏳️";
+const cn = (name) => (typeof NAMES_CN !== "undefined" && NAMES_CN[name]) || name;
 
 /* ------------------------------------------------------------
  *  Matches are laid out in bracket order so that winners feed

@@ -183,15 +183,15 @@ html, body {
 .match.is-pred:hover { background: var(--panel-2); }
 .match.is-upcoming { border-left: 3px solid var(--upcoming); opacity: 0.92; }
 
+/* status badge sits in its own top strip so it never overlaps scores */
 .match-tag {
-  position: absolute;
-  top: 6px; right: 8px;
+  display: block;
+  text-align: center;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  padding: 1px 6px;
-  border-radius: 4px;
-  z-index: 2;
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--line);
 }
 .match-tag.done { background: rgba(54, 211, 153, 0.18); color: var(--done); }
 .match-tag.pred { background: rgba(74, 108, 247, 0.2); color: #8fa6ff; }
@@ -408,7 +408,7 @@ html, body {
   .team .flag { font-size: 16px; }
   .team .name { font-weight: 600; }
   .team .score { font-size: 14px; min-width: 18px; }
-  .match-tag { font-size: 9px; padding: 1px 5px; }
+  .match-tag { font-size: 9px; padding: 2px 5px; }
 
   /* ---- Center / champion compact ---- */
   .champion { width: 150px; padding: 16px 12px; border-radius: 12px; }
