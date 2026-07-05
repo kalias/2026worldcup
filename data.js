@@ -88,7 +88,7 @@ const ROUNDS = [
         },
       },
       {
-        a: "Morocco", b: "Canada", sa: 1, sb: 0, winner: "Morocco", status: "pred",
+        a: "Morocco", b: "Canada", sa: 3, sb: 0, winner: "Morocco", status: "done",
         rationale: {
           title: "摩洛哥 🆚 加拿大",
           verdict: "预测：摩洛哥晋级",
@@ -101,7 +101,7 @@ const ROUNDS = [
         },
       },
       {
-        a: "France", b: "Paraguay", sa: 3, sb: 0, winner: "France", status: "pred",
+        a: "France", b: "Paraguay", sa: 1, sb: 0, winner: "France", status: "done",
         rationale: {
           title: "法国 🆚 巴拉圭",
           verdict: "预测：法国晋级",

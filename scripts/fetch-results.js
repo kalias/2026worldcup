@@ -210,75 +210,64 @@ async function main() {
   console.log(`\n💾 已写入 ${path.relative(ROOT, DATA_FILE)}`);
 }
 
-/* ---- 在 data.js 文本中，定位指定 match 对象并替换比分字段 ----
- *  策略：用 "a: \"队A\"" + "b: \"队B\"" 作为锚点，找到包含这两个队名的
- *  {...} 对象块，在其内部替换 sa/sb/winner/status/pens/aet 字段。
- *  保留 rationale / note 等其余字段不动。 */
+/* ---- 在 data.js 文本中，定位指定 match 的「属性行」并替换比分字段 ----
+ *  关键：data.js 里每场比赛的 a/b/sa/sb/winner/status 都在同一物理行，
+ *  例如：
+ *    { a: "Morocco", b: "Canada", sa: 1, sb: 0, winner: "Morocco", status: "pred",
+ *      rationale: { ... } }
+ *  我们只匹配这一行（用 a:"X" 和 b:"Y" 作锚点），在该行内做字段替换。
+ *  这样完全规避 rationale 嵌套花括号导致正则匹配失败的问题。
+ *  pens/aet 可能原本在这一行（已完赛场次），也可能不在（预测场次）——
+ *  若需添加则插入到 status 之后。 */
 function updateMatchInContent(content, m, roundKey, updates) {
-  // 转义队名用于正则
   const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  // 匹配包含这两个队名的对象（顺序可能 a,b 或 b,a）
   const aPat = esc(m.a);
   const bPat = esc(m.b);
 
-  // 找到 a: "X", b: "Y" 这一行（允许中间有其他字段）
-  // 用宽松方式：定位 a: "队A" 出现的位置，从该处向前找最近的 { ，向后找匹配的 }
-  const aIdx = content.indexOf(`a: "${m.a}"`);
-  if (aIdx === -1) {
-    // 尝试反向（b 在前）
-    const bIdx = content.indexOf(`b: "${m.a}"`);
-    if (bIdx === -1) {
-      console.warn(`  ⚠ 定位失败: ${m.a} vs ${m.b}，跳过`);
-      return content;
-    }
-  }
-
-  // 重新定位：找包含 "队A" 和 "队B" 的最近 {...}
-  const re = new RegExp(
-    `\\{[^{}]*?a:\\s*"${aPat}"[^{}]*?b:\\s*"${bPat}"[^{}]*?\\}|\\{[^{}]*?b:\\s*"${aPat}"[^{}]*?a:\\s*"${bPat}"[^{}]*?\\}`,
-    "s"
+  // 匹配同时含 a:"队A" 和 b:"队B" 的那一行（两种顺序都覆盖）。
+  // 不要求行首有 {（{ 可能在上一行单独存在）。
+  // [^\n]* 保证不跨行，避免误匹配到 rationale 内的文本。
+  const lineRe = new RegExp(
+    `^[ \\t]*a:[ \\t]*"${aPat}"[^\\n]*?b:[ \\t]*"${bPat}"[^\\n]*$` +
+    `|^[ \\t]*a:[ \\t]*"${bPat}"[^\\n]*?b:[ \\t]*"${aPat}"[^\\n]*$`,
+    "m"
   );
-  const match = re.exec(content);
-  if (!match) {
-    console.warn(`  ⚠ 正则定位失败: ${m.a} vs ${m.b}，跳过`);
+  const lineMatch = lineRe.exec(content);
+  if (!lineMatch) {
+    console.warn(`  ⚠ 定位失败: ${m.a} vs ${m.b}（找不到属性行），跳过`);
     return content;
   }
 
-  const block = match[0];
-  let updated = block;
+  let line = lineMatch[0];
+  const origLine = line;
 
-  // 替换 status
-  updated = updated.replace(/status:\s*"[^"]*"/, `status: "${updates.status}"`);
-  // 替换 sa
-  updated = updated.replace(/(sa:\s*)[\d.]+/, `$1${updates.sa}`);
-  // 替换 sb
-  updated = updated.replace(/(sb:\s*)[\d.]+/, `$1${updates.sb}`);
-  // 替换 winner
-  updated = updated.replace(/winner:\s*"[^"]*"/, `winner: "${updates.winner}"`);
+  // 替换 status / sa / sb / winner（这些字段一定在该行）
+  line = line.replace(/status:\s*"[^"]*"/, `status: "${updates.status}"`);
+  line = line.replace(/(sa:\s*)[\d.]+/, `$1${updates.sa}`);
+  line = line.replace(/(sb:\s*)[\d.]+/, `$1${updates.sb}`);
+  line = line.replace(/winner:\s*"[^"]*"/, `winner: "${updates.winner}"`);
 
-  // 处理 pens：有则设置，无则移除
+  // 处理 pens
   if (updates.pens) {
-    if (/pens:\s*"[^"]*"/.test(updated)) {
-      updated = updated.replace(/pens:\s*"[^"]*"/, `pens: "${updates.pens}"`);
+    if (/pens:\s*"[^"]*"/.test(line)) {
+      line = line.replace(/pens:\s*"[^"]*"/, `pens: "${updates.pens}"`);
     } else {
-      // 加到 status 之后
-      updated = updated.replace(/(status:\s*"[^"]*")/, `$1, pens: "${updates.pens}"`);
+      line = line.replace(/(status:\s*"[^"]*")/, `$1, pens: "${updates.pens}"`);
     }
   } else {
-    // 移除 pens 字段（如果存在）
-    updated = updated.replace(/,\s*pens:\s*"[^"]*"/, "");
+    line = line.replace(/,\s*pens:\s*"[^"]*"/, "");
   }
 
-  // 处理 aet：true 则加，false 则移除
+  // 处理 aet
   if (updates.aet) {
-    if (!/aet:\s*true/.test(updated)) {
-      updated = updated.replace(/(status:\s*"[^"]*")/, `$1, aet: true`);
+    if (!/aet:\s*true/.test(line)) {
+      line = line.replace(/(status:\s*"[^"]*")/, `$1, aet: true`);
     }
   } else {
-    updated = updated.replace(/,\s*aet:\s*true/, "");
+    line = line.replace(/,\s*aet:\s*true/, "");
   }
 
-  return content.replace(block, updated);
+  return content.replace(origLine, line);
 }
 
 main().catch((e) => {
