@@ -75,7 +75,7 @@ const ROUNDS = [
     key: "r16",
     matches: [
       {
-        a: "Brazil", b: "Norway", sa: 2, sb: 1, winner: "Brazil", status: "pred",
+        a: "Brazil", b: "Norway", sa: 1, sb: 2, winner: "Norway", status: "done",
         rationale: {
           title: "巴西 🆚 挪威",
           verdict: "预测：巴西晋级",
@@ -114,7 +114,7 @@ const ROUNDS = [
         },
       },
       {
-        a: "England", b: "Mexico", sa: 2, sb: 1, winner: "England", status: "pred",
+        a: "England", b: "Mexico", sa: 3, sb: 2, winner: "England", status: "done",
         rationale: {
           title: "英格兰 🆚 墨西哥",
           verdict: "预测：英格兰晋级",
