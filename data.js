@@ -127,7 +127,7 @@ const ROUNDS = [
         },
       },
       {
-        a: "Belgium", b: "USA", sa: 2, sb: 1, winner: "Belgium", status: "pred",
+        a: "Belgium", b: "USA", sa: 4, sb: 1, winner: "Belgium", status: "done",
         rationale: {
           title: "比利时 🆚 美国",
           verdict: "预测：比利时晋级",
@@ -140,7 +140,7 @@ const ROUNDS = [
         },
       },
       {
-        a: "Spain", b: "Portugal", sa: 2, sb: 1, winner: "Spain", status: "pred",
+        a: "Spain", b: "Portugal", sa: 1, sb: 0, winner: "Spain", status: "done",
         rationale: {
           title: "西班牙 🆚 葡萄牙",
           verdict: "预测：西班牙晋级",
