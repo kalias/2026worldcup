@@ -153,7 +153,7 @@ const ROUNDS = [
         },
       },
       {
-        a: "Egypt", b: "Argentina", sa: 1, sb: 2, winner: "Argentina", status: "pred",
+        a: "Egypt", b: "Argentina", sa: 2, sb: 3, winner: "Argentina", status: "done",
         rationale: {
           title: "埃及 🆚 阿根廷",
           verdict: "预测：阿根廷晋级",
@@ -166,7 +166,7 @@ const ROUNDS = [
         },
       },
       {
-        a: "Colombia", b: "Switzerland", sa: 1, sb: 2, winner: "Switzerland", status: "pred",
+        a: "Colombia", b: "Switzerland", sa: 0, sb: 0, winner: "Switzerland", status: "done", pens: "4-3",
         rationale: {
           title: "哥伦比亚 🆚 瑞士",
           verdict: "预测：瑞士晋级",
