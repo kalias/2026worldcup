@@ -185,7 +185,7 @@ const ROUNDS = [
     key: "qf",
     matches: [
       {
-        a: "Morocco", b: "France", sa: 1, sb: 2, winner: "France", status: "pred",
+        a: "Morocco", b: "France", sa: 0, sb: 2, winner: "France", status: "done",
         rationale: {
           title: "摩洛哥 🆚 法国",
           verdict: "预测：法国晋级",
