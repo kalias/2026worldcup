@@ -198,7 +198,7 @@ const ROUNDS = [
         },
       },
       {
-        a: "Belgium", b: "Spain", sa: 1, sb: 2, winner: "Spain", status: "pred",
+        a: "Belgium", b: "Spain", sa: 1, sb: 2, winner: "Spain", status: "done",
         rationale: {
           title: "比利时 🆚 西班牙",
           verdict: "预测：西班牙晋级",
