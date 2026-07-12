@@ -314,12 +314,14 @@
     scrollEl.addEventListener("scroll", updateScrollEdges, { passive: true });
     window.addEventListener("resize", updateScrollEdges);
     // On first load, centre the bracket so the Final/Champion sits in the
-    // middle of the viewport (the tree is wider than any screen, so we start
-    // at the middle rather than the left edge). Only do this once — don't
-    // fight the user's manual scrolling afterwards.
+    // middle of the viewport — but ONLY on wide screens (desktop/tablet).
+    // On narrow (mobile) screens, centring hides both halves off-screen and
+    // leaves the user staring at empty space, so start from the left edge
+    // there and let them scroll right naturally.
     requestAnimationFrame(() => {
       const max = scrollEl.scrollWidth - scrollEl.clientWidth;
-      scrollEl.scrollLeft = Math.max(0, max / 2);
+      const isWide = window.matchMedia("(min-width: 900px)").matches;
+      scrollEl.scrollLeft = isWide ? Math.max(0, max / 2) : 0;
       updateScrollEdges();
     });
   }
