@@ -22,8 +22,17 @@ const ROOT = path.resolve(__dirname, "..");
 const DATA_FILE = path.join(ROOT, "data.js");
 const DRY_RUN = process.argv.includes("--dry-run");
 
-const ESPN_URL =
-  "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719";
+// ESPN scoreboard endpoint caps results at 100 events. A single wide query
+// (6/11–7/19) returns ~100 group-stage + R32 + R16 matches and TRUNCATES the
+// later knockout rounds (QF/SF/Final). Fetch in date chunks and merge so the
+// late-stage matches are always included.
+const ESPN_BASE =
+  "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=";
+const ESPN_DATE_RANGES = [
+  "20260611-20260630", // group stage
+  "20260701-20260708", // R32 + early R16
+  "20260709-20260719", // QF + SF + Final (the ones that get truncated)
+];
 
 /* ---- ESPN 队名 → data.js 队名 映射 ----
  * ESPN 用的名字和我们 data.js 里的不完全一致，统一映射。 */
@@ -117,9 +126,20 @@ function loadRounds(dataJsContent) {
 
 /* ---- 主逻辑 ---- */
 async function main() {
-  console.log("📡 抓取 ESPN 赛果数据...");
-  const data = await fetchJson(ESPN_URL);
-  const events = data.events || [];
+  console.log("📡 抓取 ESPN 赛果数据（分段查询避免截断）...");
+  // Fetch each date range and merge events, dedup by event id.
+  const seenIds = new Set();
+  const events = [];
+  for (const range of ESPN_DATE_RANGES) {
+    const part = await fetchJson(ESPN_BASE + range);
+    for (const e of part.events || []) {
+      const id = e.id || `${e.date}|${(e.shortName || e.name || "")}`;
+      if (!seenIds.has(id)) {
+        seenIds.add(id);
+        events.push(e);
+      }
+    }
+  }
   console.log(`   获取到 ${events.length} 场比赛数据`);
 
   const resultsIdx = buildResultsIndex(events);
